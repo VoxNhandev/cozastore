@@ -1,15 +1,21 @@
 package com.cybersoft.cozastore.controller;
 
+import com.cybersoft.cozastore.exception.FileNotFoundException;
 import com.cybersoft.cozastore.payload.request.ProductResquest;
 import com.cybersoft.cozastore.payload.response.BaseResponse;
 import com.cybersoft.cozastore.service.ProductService;
 import com.cybersoft.cozastore.service.imp.IProductService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.io.File;
 import java.io.IOException;
@@ -27,13 +33,21 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/product")
 public class ProductController {
 
+    @Value("${root.file.path}")
+    private String rootPath;
+
     @Autowired
     private IProductService iProductService;
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> getProductByCategory(@PathVariable int id){
+    public ResponseEntity<?> getProductByCategory(
+            HttpServletRequest request,
+            @PathVariable int id){
+
+        String hostName = request.getHeader("host");
+
         BaseResponse response = new BaseResponse();
-        response.setData(iProductService.getProductByCategoryId(id));
+        response.setData(iProductService.getProductByCategoryId(hostName,id));
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
@@ -50,6 +64,30 @@ public class ProductController {
      *  - Mở một luồng đọc vào file ( stream )
      *
      */
+
+    @GetMapping("/file/{filename}")
+    public ResponseEntity<?> downloadFileProduct(@PathVariable String filename){
+        try{
+            //Định nghĩa đường dẫn folder lưu file
+            // /Users/binhcc/Desktop/git_01/image
+            Path path = Paths.get(rootPath);
+            //Định nghĩa đường dẫn tới file được lưu
+            ///Users/binhcc/Desktop/git_01/image/hinha.jpg
+            Path pathFile = path.resolve(filename);
+            Resource resource = new UrlResource(pathFile.toUri());
+            if(resource.exists() || resource.isReadable()){
+                //Cho phép download file
+                return ResponseEntity.ok()
+                        .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
+                        .body(resource);
+            }else{
+                throw new FileNotFoundException("Không tìm thấy file");
+            }
+        }catch (Exception e){
+            //Lỗi
+            throw new FileNotFoundException("Không tìm thấy file");
+        }
+    }
 
     @PostMapping("")
     public ResponseEntity<?> addProduct(@Valid ProductResquest productResquest) {
@@ -71,9 +109,10 @@ public class ProductController {
 //        resolve <=> /
 //        pathRoot.resolve(filename) <=> /Users/binhcc/Desktop/git_01/image/file_name.png
 //        Files.copy(file.getInputStream(),pathRoot.resolve(filename), StandardCopyOption.REPLACE_EXISTING);
+
         String fileName = productResquest.getFile().getOriginalFilename();
         try{
-            String rootFolder = "/Users/binhcc/Desktop/git_01/image";
+            String rootFolder = rootPath;
             Path pathRoot = Paths.get(rootFolder);
             if(!Files.exists(pathRoot)){
                 Files.createDirectory(pathRoot);
