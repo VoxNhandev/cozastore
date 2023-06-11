@@ -5,6 +5,8 @@ import com.cybersoft.cozastore.payload.request.ProductResquest;
 import com.cybersoft.cozastore.payload.response.BaseResponse;
 import com.cybersoft.cozastore.service.ProductService;
 import com.cybersoft.cozastore.service.imp.IProductService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
@@ -39,10 +41,18 @@ public class ProductController {
     @Autowired
     private IProductService iProductService;
 
+    Logger logger = LoggerFactory.getLogger(ProductController.class);
+
     @GetMapping("/{id}")
     public ResponseEntity<?> getProductByCategory(
             HttpServletRequest request,
             @PathVariable int id){
+
+        logger.trace("Hello Trace Logger");
+        logger.debug("Hello Debug");
+        logger.info("Hello Info");
+        logger.warn("Hello Warning");
+        logger.error("Hello error");
 
         String hostName = request.getHeader("host");
 
