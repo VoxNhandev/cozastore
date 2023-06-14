@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class ProductService implements IProductService {
@@ -26,12 +27,34 @@ public class ProductService implements IProductService {
     private String hostName;
 
     @Override
+    public ProductResponse getDetailProduct(int id) {
+        /**
+         * Optional : Kiểu dữ liệu giúp tránh trường hợp đối tượng bị null hoặc rỗng
+         * isPresent : Kiểm tra đối tượng có dữ liệu hay không
+         * get(): Giúp hủy optional đi
+         */
+
+        Optional<ProductEntity> product = productRepository.findById(id);
+        ProductResponse productResponse = new ProductResponse();
+        if(product.isPresent()){
+            productResponse.setId(product.get().getId());
+            productResponse.setImage(product.get().getImageDetail());
+            productResponse.setPrice(product.get().getPrice());
+            productResponse.setName(product.get().getName());
+            productResponse.setDesc(product.get().getDescription());
+        }
+
+        return productResponse;
+    }
+
+    @Override
     public List<ProductResponse> getProductByCategoryId(String hostName, int id) {
         List<ProductEntity> list = productRepository.findByCategoryId(id);
         List<ProductResponse> productResponseList = new ArrayList<>();
 
         for (ProductEntity data : list) {
             ProductResponse productResponse = new ProductResponse();
+            productResponse.setId(data.getId());
             productResponse.setName(data.getName());
             productResponse.setImage("http://" + hostName + "/product/file/" + data.getImage());
             productResponse.setPrice(data.getPrice());
