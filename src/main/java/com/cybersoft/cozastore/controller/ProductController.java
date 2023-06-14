@@ -3,6 +3,7 @@ package com.cybersoft.cozastore.controller;
 import com.cybersoft.cozastore.exception.FileNotFoundException;
 import com.cybersoft.cozastore.payload.request.ProductResquest;
 import com.cybersoft.cozastore.payload.response.BaseResponse;
+import com.cybersoft.cozastore.payload.response.ProductResponse;
 import com.cybersoft.cozastore.service.ProductService;
 import com.cybersoft.cozastore.service.imp.IProductService;
 import org.slf4j.Logger;
@@ -44,15 +45,19 @@ public class ProductController {
     Logger logger = LoggerFactory.getLogger(ProductController.class);
 
     @GetMapping("/{id}")
+    public ResponseEntity<?> getDetailProduct(
+            @PathVariable int id
+    ){
+        BaseResponse response = new BaseResponse();
+        response.setData(iProductService.getDetailProduct(id));
+
+        return new ResponseEntity<>(response,HttpStatus.OK);
+    }
+
+    @GetMapping("/category/{id}")
     public ResponseEntity<?> getProductByCategory(
             HttpServletRequest request,
             @PathVariable int id){
-
-        logger.trace("Hello Trace Logger");
-        logger.debug("Hello Debug");
-        logger.info("Hello Info");
-        logger.warn("Hello Warning");
-        logger.error("Hello error");
 
         String hostName = request.getHeader("host");
 
