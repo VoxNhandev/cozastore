@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpHeaders;
@@ -52,6 +53,12 @@ public class ProductController {
         response.setData(iProductService.getDetailProduct(id));
 
         return new ResponseEntity<>(response,HttpStatus.OK);
+    }
+
+    @GetMapping("/clear-cache")
+    public ResponseEntity<?> clearCache(){
+        iProductService.clearCache();
+        return new ResponseEntity<>("",HttpStatus.OK);
     }
 
     @GetMapping("/category/{id}")

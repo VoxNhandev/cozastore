@@ -25,7 +25,6 @@ public class JwtFilter extends OncePerRequestFilter {
 
     @Autowired
     JWTHelperUtils jwtHelperUtils;
-
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 //        Lấy giá trị trên header
@@ -43,6 +42,7 @@ public class JwtFilter extends OncePerRequestFilter {
                         new UsernamePasswordAuthenticationToken("","",new ArrayList<>());
                 SecurityContext securityContext = SecurityContextHolder.getContext();
                 securityContext.setAuthentication(authenticationToken);
+//
             }
             System.out.println("Kiem tra " + data);
         }catch (Exception e){
